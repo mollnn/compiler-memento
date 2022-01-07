@@ -540,7 +540,7 @@ nfa = merge_nfa(nfas)
 dfa = nfa2dfa(nfa)
 dfa = dfamin(dfa)
 
-printf(dfa)
+# printf(dfa)
 # print(ans)
 
 src_file = open("src.txt","r")
