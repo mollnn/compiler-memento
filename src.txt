@@ -1,0 +1,15 @@
+#include <iostream>
+using namespace std;
+
+bool f(int a)
+{
+	return a + 1 == 2;
+}
+
+int main()
+{
+	int a;
+	float b;
+	b = 4e+5;
+	return 0;
+}
