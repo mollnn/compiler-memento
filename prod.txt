@@ -1,0 +1,15 @@
+S' -> L
+S -> if ( C ) S
+S -> { L }
+L -> L S ;
+L -> S ;
+S -> A
+C -> E == E
+A -> Id = E
+E -> E + E1
+E -> E1
+E -> E1 * E2
+E1 -> E2
+E2 -> Id
+E2 -> ( E )
+E2 -> Const

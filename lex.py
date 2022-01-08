@@ -202,7 +202,9 @@ def printf0(dic):
     js = json.dumps(dic, sort_keys=True, indent=4, separators=(',', ':'))
     print(js)
 
+
 epsc_buffer = {}
+
 
 def eps_closure(nfa, states):
     global epsc_buffer
@@ -272,12 +274,9 @@ def nfa2dfa(nfa):
         for j in srcs:
             pats += nfa["tt"][j]
         pats = list(set(pats))
-        if len(pats) == 0:
-            pats = -1
-        else:
-            pats = pats[0]  # 默认排在前面的模式串优先
         if flag:
             ts.append(i)
+        pats = min(pats) if len(pats)>0 else -1
         tt.append(pats)
     return {'s': 0, 't': ts, 'e': e, 'tt': tt}
 
@@ -363,12 +362,12 @@ def dfamin(dfa):
     # 决定哪些状态是接受状态
     for i in range(len(div)):
         flag = 1
-        bel = -1
+        bel = 99999
         for j in div[i]:
             if j not in dfa["t"]:
                 flag = 0
             else:
-                bel = dfa["tt"][j]
+                bel = min(bel, dfa["tt"][j])
         if flag:
             ans["t"].append(i)
             ans["tt"].append(bel)
@@ -450,6 +449,7 @@ def run(dfa, str):
 
 def runx(dfa, src):
     ptr = 0
+    results = []
     while ptr < len(src):
         p = dfa["s"]
 
@@ -471,13 +471,18 @@ def runx(dfa, src):
                 last_match_ans = dfa["tt"][p]
         if last_match_pos == -1:
             # 错误，跳过该行
-            print("\033[31merror near:", src[ptr:ptr+32],"\033[0m")
+            print("\033[31merror near:", src[ptr:ptr+32], "\033[0m")
             while ptr < len(src) and src[ptr] != '\n':
                 ptr += 1
             ptr += 1
         else:
-            print("\033[32mmatch re#%d" % last_match_ans, str[:last_match_pos],"\033[0m")
+            # print("\033[32mmatch re#%d" % last_match_ans, str[:last_match_pos],"\033[0m")
+            result_re_id = last_match_ans
+            result_str = str[:last_match_pos]
+            if result_str not in " \n\r\t":
+                results.append((result_re_id, result_str))
             ptr += last_match_pos
+    return results
 
 
 def re_preprocess(re):
@@ -528,14 +533,13 @@ def re_preprocess(re):
     return re
 
 
-re_file = open("re.txt","r")
-res = re_file.readlines()
-res = [i[:-1] for i in res]
-print(list(len(i) for i in res))
+re_file = open("re.txt", "r")
+re_list = re_file.readlines()
+re_list = [i[:-1] for i in re_list]
 
-sres = copy.deepcopy(res)
-res = [re_preprocess(i) for i in res]
-nfas = [re2nfa(toSuffix(i)) for i in res]
+sres = copy.deepcopy(re_list)
+re_list = [re_preprocess(i) for i in re_list]
+nfas = [re2nfa(toSuffix(i)) for i in re_list]
 nfa = merge_nfa(nfas)
 dfa = nfa2dfa(nfa)
 dfa = dfamin(dfa)
@@ -543,10 +547,19 @@ dfa = dfamin(dfa)
 # printf(dfa)
 # print(ans)
 
-src_file = open("src.txt","r")
+src_file = open("src.txt", "r")
 src = src_file.read()
 
-runx(dfa, src)
+results = runx(dfa, src)
+
+# map.txt 对每个 re 给定一个名称，用于语法分析
+map_file = open("map.txt", "r")
+token_map = map_file.readlines()
+token_map = [i[:-1] for i in token_map]
+
+tokens_file = open("tokens.txt", "w")
+for x, y in results:
+    print(x,  token_map[x], y, file=tokens_file)
 
 # s = ["a", "b", "ab", "aa", "abc", "1", "0", "123", "1.23", "a11"]
 # ans = [run(dfa, i) for i in s]

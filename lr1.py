@@ -97,8 +97,8 @@ def make_lr1(prods):
             else:
                 ccc[(j[0], j[1])] += j[2]
         ccc = [[i[0], i[1], j] for i, j in ccc.items()]
-        print("\033[35m[I%d]:\n  \033[31m" % i, '\n   \033[31m'.join(prod2str(prods[j[0]], j[1])+' \t\033[33m'+j[2]+'\033[30m'
-              for j in ccc), end="\n   \033[32m")
+        # print("\033[35m[I%d]:\n  \033[31m" % i, '\n   \033[31m'.join(prod2str(prods[j[0]], j[1])+' \t\033[33m'+j[2]+'\033[30m'
+        #       for j in ccc), end="\n   \033[32m")
         candiwords = []
         for j in cc[i]:
             prod = prods[j[0]]
@@ -122,7 +122,7 @@ def make_lr1(prods):
                 cc.append(tmp)
                 table.append({})
             if len(tmp) > 0:
-                print(j, cc.index(tmp), sep=",", end="  ")
+                # print(j, cc.index(tmp), sep=",", end="  ")
                 if j in terminals:
                     if j not in table[i].keys():
                         table[i][j] = "s%d" % cc.index(tmp)
@@ -131,60 +131,55 @@ def make_lr1(prods):
                 else:
                     table[i][j] = "%d" % cc.index(tmp)
         i += 1
-        print("\033[0m")
-    head = ['I']
-    for j in terminals:
-        head.append(j)
-    for j in nonterminals:
-        if j == "S'":
-            continue
-        head.append(j)
-    print('---'.join(''+'-'*(5) for i in head))
-    print(' | '.join(i+' '*(5-len(i)) for i in head))
-    print('-+-'.join(''+'-'*(5) for i in head))
-    for i, line in enumerate(table):
-        lo = [str(i)]
-        for j in terminals:
-            if j in line.keys():
-                lo.append(table[i][j])
-            else:
-                lo.append("")
-        for j in nonterminals:
-            if j == "S'":
-                continue
-            if j in line.keys():
-                lo.append(table[i][j])
-            else:
-                lo.append("")
-        print(' | '.join(i+' '*(5-len(i)) for i in lo))
+        # print("\033[0m")
+    # head = ['I']
+    # for j in terminals:
+    #     head.append(j)
+    # for j in nonterminals:
+    #     if j == "S'":
+    #         continue
+    #     head.append(j)
+    # print('---'.join(''+'-'*(5) for i in head))
+    # print(' | '.join(i+' '*(5-len(i)) for i in head))
+    # print('-+-'.join(''+'-'*(5) for i in head))
+    # for i, line in enumerate(table):
+    #     lo = [str(i)]
+    #     for j in terminals:
+    #         if j in line.keys():
+    #             lo.append(table[i][j])
+    #         else:
+    #             lo.append("")
+    #     for j in nonterminals:
+    #         if j == "S'":
+    #             continue
+    #         if j in line.keys():
+    #             lo.append(table[i][j])
+    #         else:
+    #             lo.append("")
+    #     print(' | '.join(i+' '*(5-len(i)) for i in lo))
     return table
 
 
-prods = []
-# prods.append(list("S' S".split(' ')))
-# prods.append(list("S E".split(' ')))
-# prods.append(list("E T + T".split(' ')))
-# prods.append(list("T F * F".split(' ')))
-# prods.append(list("F ( E )".split(' ')))
+prod_file = open("prod.txt", "r")
+prod_lines = prod_file.readlines()
+prod_lines = [i[:-1] for i in prod_lines]
+prod_lines = [i[:-1] if i[-1] == ' ' else i for i in prod_lines]
 
-prods.append(list("S' S".split(' ')))
-prods.append(list("S i C t S".split(' ')))
-prods.append(list("S { L }".split(' ')))
-prods.append(list("L L ; S".split(' ')))
-prods.append(list("L S".split(' ')))
-prods.append(list("S A".split(' ')))
-prods.append(list("C b".split(' ')))
-prods.append(list("A d = E".split(' ')))
-prods.append(list("E E + E1".split(' ')))
-prods.append(list("E E1".split(' ')))
-prods.append(list("E1 E1 * E2".split(' ')))
-prods.append(list("E1 E2".split(' ')))
-prods.append(list("E2 i".split(' ')))
-
-
+prods = [i.split(" ")[:1] + i.split(" ")[2:] for i in prod_lines]
+print(prods)
 table = make_lr1(prods)
 
-tokens = ["i", "b", "t", "d", "=", "i", "$"]
+tokens = []
+token_file = open("tokens.txt", "r")
+token_lines = token_file.readlines()
+token_lines = [i[:-1] for i in token_lines]
+token_lines = [i[:-1] if i[-1] == ' ' else i for i in token_lines]
+token_lines = [i.split(' ') for i in token_lines]
+tokens = [i[1] for i in token_lines]
+tokens_str = [i[2] for i in token_lines]
+tokens.append("$")
+tokens_str.append("")
+
 
 stack_token = ['#']
 stack_state = [0]
@@ -195,7 +190,7 @@ while len(stack_token) > 0:
     cur_token = tokens[input_ptr]
     cur_state = stack_state[-1]
     if cur_token not in table[cur_state].keys():
-        print("error")
+        print("errorA")
         break
     action = table[cur_state][cur_token]
     if action == "acc":
@@ -216,7 +211,7 @@ while len(stack_token) > 0:
         cur_state = stack_state[-1]
         goto_nt = prods[prod_id][0]
         if goto_nt not in table[cur_state].keys():
-            print("error")
+            print("errorB")
             break
         next_state = int(table[cur_state][goto_nt])
         stack_token.append(goto_nt)
