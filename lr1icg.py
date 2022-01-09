@@ -131,7 +131,7 @@ def make_lr1(prods):
                 else:
                     table[i][j] = "%d" % cc.index(tmp)
         i += 1
-        # print("\033[0m")
+    #     print("\033[0m")
     # head = ['I']
     # for j in terminals:
     #     head.append(j)
@@ -188,6 +188,7 @@ stack_attr = [{}]
 input_ptr = 0
 
 tmpcnt = 0
+nextins = 0
 
 while len(stack_token) > 0:
     cur_token = tokens[input_ptr]
@@ -206,11 +207,11 @@ while len(stack_token) > 0:
         stack_attr.append(
             {"token_name": cur_token, "value": tokens_str[input_ptr]})
         input_ptr += 1
-        print("shift", cur_token)
+        # print("shift", cur_token, "state", next_state)
     else:
         prod_id = int(action[1:])
         prod_len = len(prods[prod_id]) - 1
-        print("reduce", prods[prod_id])
+        # print("reduce", prods[prod_id])
 
         delta_token = stack_token[-prod_len:]
         delta_state = stack_state[-prod_len:]
@@ -228,31 +229,63 @@ while len(stack_token) > 0:
         next_state = int(table[cur_state][goto_nt])
         stack_token.append(goto_nt)
         stack_state.append(next_state)
-        stack_attr.append({"token_name": cur_token})
+        stack_attr.append({"token_name": goto_nt})
 
         # 在这里完成语义动作
         if prod_id + 1 == 1:
             stack_attr[-1]["_"] = "2333"
+        elif prod_id + 1 == 4:
+            if "chain" in delta_attr[1].keys():
+                for i in delta_attr[1]["chain"]:
+                    print("\033[31m", "(backpatch instru (%d) with addr (%d)" %
+                        (i, nextins), "\033[0m")
+        elif prod_id + 1 == 5:
+            if "chain" in delta_attr[0].keys():
+                for i in delta_attr[0]["chain"]:
+                    print("\033[31m", "(backpatch instru (%d) with addr (%d)" %
+                        (i, nextins), "\033[0m")
+        elif prod_id + 1 == 7:
+            stack_attr[-1]["tc"] = [nextins]
+            stack_attr[-1]["fc"] = [nextins+1]
+            print("\033[32m(%d)" % nextins, "\033[33m", "JE  %s %s 0" %
+                  (delta_attr[0]["value"], delta_attr[2]["value"]), "\033[0m")
+            nextins += 1
+            print("\033[32m(%d)" % nextins, "\033[33m", "J   0", "\033[0m")
+            nextins += 1
         elif prod_id + 1 == 8:
-            print("\033[33m", "MOV %s %s" %
-                  (delta_attr[0]["value"], delta_attr[2]["value"]),"\033[0m")
+            print("\033[32m(%d)" % nextins, "\033[33m", "MOV %s  %s" %
+                  (delta_attr[0]["value"], delta_attr[2]["value"]), "\033[0m")
+            nextins += 1
         elif prod_id + 1 == 9:
             stack_attr[-1]["value"] = "t%d" % tmpcnt
             tmpcnt += 1
-            print("\033[33m", "ADD %s  %s %s" % (
-                stack_attr[-1]["value"], delta_attr[0]["value"], delta_attr[2]["value"]),"\033[0m")
+            print("\033[32m(%d)" % nextins, "\033[33m", "ADD %s  %s %s" % (
+                stack_attr[-1]["value"], delta_attr[0]["value"], delta_attr[2]["value"]), "\033[0m")
+            nextins += 1
         elif prod_id + 1 == 10:
             stack_attr[-1]["value"] = delta_attr[0]["value"]
         elif prod_id + 1 == 11:
             stack_attr[-1]["value"] = "t%d" % tmpcnt
             tmpcnt += 1
-            print("\033[33m", "MUL %s  %s %s" % (
-                stack_attr[-1]["value"], delta_attr[0]["value"], delta_attr[2]["value"]),"\033[0m")
+            print("\033[32m(%d)" % nextins, "\033[33m", "MUL %s  %s %s" % (
+                stack_attr[-1]["value"], delta_attr[0]["value"], delta_attr[2]["value"]), "\033[0m")
+            nextins += 1
         elif prod_id + 1 == 12:
             stack_attr[-1]["value"] = delta_attr[0]["value"]
         elif prod_id + 1 == 13:
+            stack_attr[-1]["value"] = delta_attr[1]["value"]
+        elif prod_id + 1 == 14:
             stack_attr[-1]["value"] = delta_attr[0]["value"]
         elif prod_id + 1 == 15:
             stack_attr[-1]["value"] = delta_attr[0]["value"]
+        elif prod_id + 1 == 16:
+            stack_attr[-1]["chain"] = delta_attr[0]["chain"] + \
+                (delta_attr[1]["chain"]
+                 if "chain" in delta_attr[1].keys() else [])
+        elif prod_id + 1 == 17:
+            for i in delta_attr[2]["tc"]:
+                print("\033[31m", "(backpatch instru (%d) with addr (%d)" %
+                      (i, nextins), "\033[0m")
+            stack_attr[-1]["chain"] = delta_attr[2]["fc"]
 
-        print("  ", stack_token[-1], stack_attr[-1])
+        # print("  ", stack_token[-1], stack_attr[-1], stack_state[-1])

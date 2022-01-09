@@ -1,9 +1,9 @@
-S' -> L
-S -> if ( C ) S
+S' -> S
+S -> ;
 S -> { L }
-L -> L S ;
-L -> S ;
-S -> A
+L -> L S
+L -> S
+S -> A ;
 C -> E == E
 A -> Id = E
 E -> E + E1
@@ -13,3 +13,5 @@ E1 -> E2
 E2 -> ( E )
 E2 -> Const
 E2 -> Id
+S -> CS S 
+CS -> if ( C )
