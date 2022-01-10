@@ -1,17 +1,37 @@
-S' -> S
-S -> ;
+S' -> L 
+L -> L S 
+L -> S 
+S -> S0 ; 
 S -> { L }
-L -> L S
-L -> S
-S -> A ;
-C -> E == E
-A -> Id = E
-E -> E + E1
-E -> E1
-E1 -> E1 * E2
-E1 -> E2
-E2 -> ( E )
-E2 -> Const
-E2 -> Id
-S -> CS S 
-CS -> if ( C )
+S0 -> Sa 
+Sa -> Id = E 
+S -> IfC S
+S -> IfCEl S
+IfCEl -> IfC S else
+IfC -> if ( C )
+C -> C1 
+C -> Ca C1 
+Ca -> C && 
+C1 -> C2
+C1 -> Co C2
+Co -> C1 ||  
+C2 -> C3
+C2 -> ! C3
+C3 -> ( C )
+C -> E Rop E 
+Rop -> ==
+Rop -> !=
+Rop -> <
+Rop -> <=
+Rop -> >
+Rop -> >=
+E -> E + Et
+E -> E - Et
+E -> Et
+Et -> Et * Ef
+Et -> Et / Ef
+Et -> Et % Ef
+Et -> Ef 
+Ef -> ( E )
+Ef -> Id 
+E -> Const
