@@ -415,8 +415,9 @@ while len(stack_token) > 0:
         elif prod_id + 1 == 40:
             stack_attr[-1]["quad"] = nextins
         print(stack_attr[-1], stack_state[-1])
+print(delta_attr)
 stack_attr[-1]["tag"] = ""
-for i in delta_attr[0]["chain"]:
+for i in delta_attr[1]["chain"]:
     ans[i][3] = nextins
 for ind, i in enumerate(ans):
     print("(%d)" % ind, i[0], i[1], i[2], i[3], sep='\t')
