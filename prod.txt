@@ -10,15 +10,15 @@ S -> IfCEl S
 IfCEl -> IfC S else
 IfC -> if ( C )
 C -> C1 
-C -> Ca C1 
-Ca -> C && 
+C -> Co C1 
+Co -> C ||
 C1 -> C2
-C1 -> Co C2
-Co -> C1 ||  
+C1 -> Ca C2
+Ca -> C1 && 
 C2 -> C3
 C2 -> ! C3
 C3 -> ( C )
-C -> E Rop E 
+C3 -> E Rop E 
 Rop -> ==
 Rop -> !=
 Rop -> <

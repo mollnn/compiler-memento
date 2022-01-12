@@ -95,10 +95,10 @@ def make_lr1(prods):
             if (j[0], j[1]) not in ccc.keys():
                 ccc[(j[0], j[1])] = j[2]
             else:
-                ccc[(j[0], j[1])] += j[2]
+                ccc[(j[0], j[1])] = j[2]
         ccc = [[i[0], i[1], j] for i, j in ccc.items()]
-        # print("\033[35m[I%d]:\n  \033[31m" % i, '\n   \033[31m'.join(prod2str(prods[j[0]], j[1])+' \t\033[33m'+j[2]+'\033[30m'
-        #       for j in ccc), end="\n   \033[32m")
+        print("\033[35m[I%d]:\n  \033[31m" % i, '\n   \033[31m'.join(prod2str(prods[j[0]], j[1])+' \t\033[33m'+j[2]+'\033[30m'
+              for j in ccc), end="\n   \033[32m")
         candiwords = []
         for j in cc[i]:
             prod = prods[j[0]]
@@ -110,7 +110,7 @@ def make_lr1(prods):
                     if j[2] not in table[i].keys():
                         table[i][j[2]] = 'r%d' % j[0]
                     else:
-                        table[i][j[2]] += 'r%d' % j[0]
+                        table[i][j[2]] = 'r%d' % j[0]
                 else:
                     if '$' not in table[i].keys():
                         table[i]['$'] = 'acc'
@@ -122,41 +122,41 @@ def make_lr1(prods):
                 cc.append(tmp)
                 table.append({})
             if len(tmp) > 0:
-                # print(j, cc.index(tmp), sep=",", end="  ")
+                print(j, cc.index(tmp), sep=",", end="  ")
                 if j in terminals:
                     if j not in table[i].keys():
                         table[i][j] = "s%d" % cc.index(tmp)
                     else:
-                        table[i][j] += "s%d" % cc.index(tmp)
+                        table[i][j] = "s%d" % cc.index(tmp)
                 else:
                     table[i][j] = "%d" % cc.index(tmp)
         i += 1
-        # print("\033[0m")
-    # head = ['I']
-    # for j in terminals:
-    #     head.append(j)
-    # for j in nonterminals:
-    #     if j == "S'":
-    #         continue
-    #     head.append(j)
-    # print('---'.join(''+'-'*(5) for i in head))
-    # print(' | '.join(i+' '*(5-len(i)) for i in head))
-    # print('-+-'.join(''+'-'*(5) for i in head))
-    # for i, line in enumerate(table):
-    #     lo = [str(i)]
-    #     for j in terminals:
-    #         if j in line.keys():
-    #             lo.append(table[i][j])
-    #         else:
-    #             lo.append("")
-    #     for j in nonterminals:
-    #         if j == "S'":
-    #             continue
-    #         if j in line.keys():
-    #             lo.append(table[i][j])
-    #         else:
-    #             lo.append("")
-    #     print(' | '.join(i+' '*(5-len(i)) for i in lo))
+        print("\033[0m")
+    head = ['I']
+    for j in terminals:
+        head.append(j)
+    for j in nonterminals:
+        if j == "S'":
+            continue
+        head.append(j)
+    print('---'.join(''+'-'*(5) for i in head))
+    print(' | '.join(i+' '*(5-len(i)) for i in head))
+    print('-+-'.join(''+'-'*(5) for i in head))
+    for i, line in enumerate(table):
+        lo = [str(i)]
+        for j in terminals:
+            if j in line.keys():
+                lo.append(table[i][j])
+            else:
+                lo.append("")
+        for j in nonterminals:
+            if j == "S'":
+                continue
+            if j in line.keys():
+                lo.append(table[i][j])
+            else:
+                lo.append("")
+        print(' | '.join(i+' '*(5-len(i)) for i in lo))
     return table
 
 
