@@ -34,4 +34,7 @@ Et -> Et % Ef
 Et -> Ef 
 Ef -> ( E )
 Ef -> Id 
-E -> Const
+Ef -> Const
+S -> Wd S
+Wd -> Wh ( C )
+Wh -> while 

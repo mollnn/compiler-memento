@@ -214,7 +214,7 @@ while len(stack_token) > 0:
         stack_attr.append(
             {"token_name": cur_token, "value": tokens_str[input_ptr]})
         input_ptr += 1
-        print("shift", cur_token, "state", next_state)
+        # print("shift", cur_token, "state", next_state)
     else:
         prod_id = int(action[1:])
         prod_len = len(prods[prod_id]) - 1
@@ -247,7 +247,7 @@ while len(stack_token) > 0:
             stack_attr[-1]["tag"] = ""
             for i in delta_attr[0]["chain"]:
                 ans[i][3] = nextins
-            stack_attr[-1]["chain"] = []
+            stack_attr[-1]["chain"] = delta_attr[1]["chain"]
         elif prod_id + 1 == 3:
             stack_attr[-1]["tag"] = ""
             stack_attr[-1]["chain"] = delta_attr[0]["chain"]
@@ -338,19 +338,83 @@ while len(stack_token) > 0:
             stack_attr[-1]["tag"] = ""
             stack_attr[-1]["tc"] = [nextins]
             stack_attr[-1]["fc"] = [nextins+1]
-            op_dict = {"==":"e", "!=":'ne', "<": 'b', "<=": 'be', ">": 'a', '>=': 'ae'}
-            ans.append(["j%s" % op_dict[delta_attr[1]["value"]] , delta_attr[0]["value"],
+            op_dict = {"==": "e", "!=": 'ne', "<": 'b',
+                       "<=": 'be', ">": 'a', '>=': 'ae'}
+            ans.append(["j%s" % op_dict[delta_attr[1]["value"]], delta_attr[0]["value"],
                        delta_attr[2]["value"], "<addr>"])
             nextins += 1
             ans.append(["j", "", "", "<addr>"])
             nextins += 1
-        elif prod_id + 1 in [22,23,24,25,26,27]:
+        elif prod_id + 1 in [22, 23, 24, 25, 26, 27]:
+            stack_attr[-1]["tag"] = ""
+            stack_attr[-1]["value"] = delta_attr[0]["value"]
+        elif prod_id + 1 == 28:
+            stack_attr[-1]["tag"] = ""
+            stack_attr[-1]["value"] = "t%d" % tmpcnt
+            ans.append(["add", delta_attr[0]["value"],
+                       delta_attr[2]["value"], "t%d" % tmpcnt])
+            nextins += 1
+            tmpcnt += 1
+        elif prod_id + 1 == 29:
+            stack_attr[-1]["tag"] = ""
+            stack_attr[-1]["value"] = "t%d" % tmpcnt
+            ans.append(["sub", delta_attr[0]["value"],
+                       delta_attr[2]["value"], "t%d" % tmpcnt])
+            nextins += 1
+            tmpcnt += 1
+        elif prod_id + 1 == 30:
+            stack_attr[-1]["tag"] = ""
+            stack_attr[-1]["value"] = delta_attr[0]["value"]
+        elif prod_id + 1 == 31:
+            stack_attr[-1]["tag"] = ""
+            stack_attr[-1]["value"] = "t%d" % tmpcnt
+            ans.append(["mul", delta_attr[0]["value"],
+                       delta_attr[2]["value"], "t%d" % tmpcnt])
+            nextins += 1
+            tmpcnt += 1
+        elif prod_id + 1 == 32:
+            stack_attr[-1]["tag"] = ""
+            stack_attr[-1]["value"] = "t%d" % tmpcnt
+            ans.append(["div", delta_attr[0]["value"],
+                       delta_attr[2]["value"], "t%d" % tmpcnt])
+            nextins += 1
+            tmpcnt += 1
+        elif prod_id + 1 == 33:
+            stack_attr[-1]["tag"] = ""
+            stack_attr[-1]["value"] = "t%d" % tmpcnt
+            ans.append(["mod", delta_attr[0]["value"],
+                       delta_attr[2]["value"], "t%d" % tmpcnt])
+            nextins += 1
+            tmpcnt += 1
+        elif prod_id + 1 == 34:
+            stack_attr[-1]["tag"] = ""
+            stack_attr[-1]["value"] = delta_attr[0]["value"]
+        elif prod_id + 1 == 35:
+            stack_attr[-1]["tag"] = ""
+            stack_attr[-1]["value"] = delta_attr[1]["value"]
+        elif prod_id + 1 == 36:
             stack_attr[-1]["tag"] = ""
             stack_attr[-1]["value"] = delta_attr[0]["value"]
         elif prod_id + 1 == 37:
             stack_attr[-1]["tag"] = ""
-            stack_attr[-1]["value"] = delta_attr[0]["value"]
-
+            stack_attr[-1]["value"] = "#" + delta_attr[0]["value"]
+        elif prod_id + 1 == 38:
+            stack_attr[-1]["tag"] = ""
+            jmp_back_instrs = delta_attr[1]["chain"] + [nextins]
+            ans.append(["j", "", "", "<addr>"])
+            nextins += 1
+            for i in jmp_back_instrs:
+                ans[i][3] = delta_attr[0]["quad"]
+            stack_attr[-1]["chain"] = delta_attr[0]["chain"]
+        elif prod_id + 1 == 39:
+            stack_attr[-1]["tag"] = ""
+            for i in delta_attr[2]["tc"]:
+                ans[i][3] = nextins
+            stack_attr[-1]["chain"] = delta_attr[2]["fc"]
+            stack_attr[-1]["quad"] = delta_attr[0]["quad"]
+        elif prod_id + 1 == 40:
+            stack_attr[-1]["quad"] = nextins
+        print(stack_attr[-1], stack_state[-1])
 stack_attr[-1]["tag"] = ""
 for i in delta_attr[0]["chain"]:
     ans[i][3] = nextins
